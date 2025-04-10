@@ -103,14 +103,34 @@ class Graph:
             print(f"Connection Error during creation: {e}")
             return None
 
+    # Inside node_graph/graph.py
+
     def remove_connection(self, connection_to_remove: Connection) -> None:
         """
-        Removes a specific connection object from the graph's list.
-        Assumes the connection has already been told to detach from ports.
+        Removes a specific connection object from the graph's list AND
+        ensures the connection is detached from its ports.
         """
+        # --- Call connection.remove() first ---
+        if connection_to_remove:
+             connection_to_remove.remove() # Ensure ports are notified
+        # --- End change ---
+
+        # Now remove from the graph's list
         try:
             self._connections.remove(connection_to_remove)
-            print(f"Connection removed from graph list: {connection_to_remove}")
+            # The print statement from connection.remove() already happened
+            # print(f"Connection removed from graph list: {connection_to_remove}") # Optional: can remove this line now
+        except ValueError:
+            # Already removed, potentially by node.disconnect_all calling this method
+            pass # Avoid redundant warnings
+
+    def notify_connection_removed(self, connection: Connection) -> None:
+        """Callback for Node/Connection to inform Graph the connection is gone."""
+        # This might now be redundant if remove_connection always calls conn.remove()
+        # Let's simplify: just call remove_connection directly
+        # This method might not even be needed anymore if node.disconnect calls graph.remove_connection
+        try:
+            self._connections.remove(connection)
         except ValueError:
             pass
 

@@ -115,24 +115,20 @@ class Node(abc.ABC):
         """
         pass # Subclasses will override
 
+    # Inside node_graph/node.py
+
     def disconnect_all(self):
         """Removes all connections attached to this node's ports."""
         print(f"Disconnecting all ports for node {self.name} ({self.id})")
         ports_to_clear = list(self.input_ports.values()) + list(self.output_ports.values())
         for port in ports_to_clear:
-            # Iterate over a copy of connections, as removing modifies the list
-            # Pylance infers 'conn' is 'Connection' from 'port.connections' hint
             for conn in list(port.connections):
-                 # This call modifies the port's connection list internally
-                 conn.remove()
-                 # Optionally notify the graph if it needs to update its list
+                 # Let the graph handle the full removal process
                  if self.graph:
-                     # Ensure notify_connection_removed exists if using this simplified version
-                     if hasattr(self.graph, 'notify_connection_removed'):
-                         self.graph.notify_connection_removed(conn)
-                     else:
-                         # Fallback if using the *very* simplified graph without notification
-                         self.graph.remove_connection(conn)
+                     self.graph.remove_connection(conn)
+                 else:
+                      # Fallback if no graph context? Should ideally not happen.
+                      conn.remove()
 
 
     def __repr__(self) -> str:
