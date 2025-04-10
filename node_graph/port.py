@@ -165,18 +165,12 @@ class Port:
         """Adds a connection to this port's list."""
         if connection not in self._connections:
             self._connections.append(connection)
-            # When an input port gets connected, the node might need re-evaluation
-            if self.port_type == PortType.INPUT and self.node:
-                self.node.mark_dirty()
 
 
     def remove_connection(self, connection: 'Connection') -> None:
         """Removes a connection from this port's list."""
         try:
             self._connections.remove(connection)
-             # When an input port gets disconnected, the node might need re-evaluation
-            if self.port_type == PortType.INPUT and self.node:
-                self.node.mark_dirty()
         except ValueError:
             # Connection not found, potentially already removed
             pass
